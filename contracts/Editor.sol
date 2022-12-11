@@ -145,6 +145,17 @@ contract Editor is
             _tokenURI,
             ""
         );
+        
+        // Update the mapping of tokenId's to Token details, useful for retrieval functions
+        idToListedToken[currentTokenId] = CreateToken(
+            mkNFTaddress,
+            currentTokenId,
+            payable(msg.sender),
+            0,
+            false,
+            true
+        );
+
         emit TokenCreated(_tokenURI, currentTokenId, msg.sender);
         return currentTokenId;
     }
@@ -152,7 +163,8 @@ contract Editor is
     function listItem(
         address nftAddress,
         uint256 tokenId,
-        uint256 price
+        uint256 price,
+        bool createdByMarketpalce
     ) external nonReentrant {
         require(
             price > 0,
@@ -175,19 +187,73 @@ contract Editor is
             );
         }
 
-        _tokenIds.increment();
-        uint256 currentTokenID = _tokenIds.current();
+        if (!createdByMarketpalce) {
+            //Increment the tokenId counter, which is keeping track of the number of minted NFTs
+            _tokenIds.increment();
+            uint256 currentTokenID = _tokenIds.current();
 
-        idToListedToken[currentTokenID] = CreateToken(
-            nftAddress,
-            tokenId,
-            payable(msg.sender),
-            price,
-            true,
-            true
-        );
+            idToListedToken[currentTokenID] = CreateToken(
+                nftAddress,
+                tokenId,
+                payable(msg.sender),
+                price,
+                true,
+                true
+            );
+        } else {
+            idToListedToken[tokenId].price = price;
+            idToListedToken[tokenId].currentlyListed = true;
+        }
 
         emit ItemListed(msg.sender, nftAddress, tokenId, price);
+    }
+
+    // Will return all the NFTs currently listed to be sold on the marketplace
+    function getAllNFTS() public view returns (CreateToken[] memory) {
+        uint totalNFTCount = _tokenIds.current();
+        CreateToken[] memory tokens = new CreateToken[](totalNFTCount);
+
+        uint currentIndex = 0;
+
+        // TODO:  filter out currentlyListed == false over here
+        for (uint i = 0; i < totalNFTCount; i++) {
+            uint currentId = i + 1;
+            CreateToken storage currentItem = idToListedToken[currentId];
+            tokens[currentIndex] = currentItem;
+            currentIndex += 1;
+        }
+        //the array 'tokens' has the list of all NFTs in the marketplace
+        return tokens;
+    }
+
+    // Will return all the NFTs that the current user is owner or seller in
+    function getUserNFTs() public view returns (CreateToken[] memory) {
+        uint totalNFTCount = _tokenIds.current();
+        uint itemCount = 0;
+        uint currentIndex = 0;
+
+        // Important to get a count of all the NFTs that belong to the user before we can make an array for them
+        for (uint i = 0; i < totalNFTCount; i++) {
+            if (
+                idToListedToken[i + 1].owner == msg.sender
+            ) {
+                itemCount += 1;
+            }
+        }
+
+        // Once have the count of relevant NFTs, create an array then store all the NFts in it
+        CreateToken[] memory items = new CreateToken[](itemCount);
+        for (uint i = 0; i < totalNFTCount; i++) {
+            if (
+                idToListedToken[i + 1].owner == msg.sender
+            ) {
+                uint currentId = i + 1;
+                CreateToken storage currentItem = idToListedToken[currentId];
+                items[currentIndex] = currentItem;
+                currentIndex += 1;
+            }
+        }
+        return items;
     }
 
     function executeSale(
