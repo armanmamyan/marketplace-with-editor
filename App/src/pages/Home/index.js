@@ -5,9 +5,8 @@ import Shoe from "../../assets/shoe.jpeg";
 const Home = () => {
   const navigate = useNavigate();
 
-  const handleModelNavigation = (e) => {
-    const { id } = e.currentTarget;
-    return navigate("/create-model", { state: { model: id } });
+  const handleModelNavigation = () => {
+    return navigate("/create-model");
   };
 
   return (
@@ -31,15 +30,16 @@ const Home = () => {
       </Box>
       <Container maxWidth="lg">
         <Box mb={8}>
-          <Typography variant="h2">Create Your own NFT Model</Typography>
+          <Typography variant="h2">Create Your own Model</Typography>
           <Box pt={4} pb={8}>
             <Box
-              id={id}
               width={300}
               border={2}
               borderColor="#fff"
               onClick={handleModelNavigation}
               style={{ cursor: "pointer" }}
+              borderRadius={4}
+              overflow='hidden'
             >
               <Box width="100%" height={300} mb={2}>
                 <img
@@ -53,7 +53,9 @@ const Home = () => {
                   }}
                 />
               </Box>
+              <Box px={2}>
               <Typography variant="h3">Shoe</Typography>
+              </Box>
             </Box>
           </Box>
         </Box>

@@ -1,9 +1,16 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import CanvasContainer from "../../components/Models/Canvas";
 import ModelLoader from "../../components/Models/Models";
-import Aside from '../../components/Aside'
+import Aside from "../../components/Aside";
 import { Box, Typography } from "@mui/material";
 import { HexColorPicker } from "react-colorful";
+
+const LoadingObject = () => (
+  <mesh position-y={0.5}>
+    <boxGeometry args={[1, 1, 1, 2, 2, 2]} />
+    <meshBasicMaterial wireframe color="red" />
+  </mesh>
+);
 
 const CreateModel = () => {
   const [layers, setLayers] = useState({
@@ -35,11 +42,12 @@ const CreateModel = () => {
 
   return (
     <>
-   
       <Box display="flex">
         <Box height="100vh" width="100%">
           <CanvasContainer>
-            <ModelLoader layers={layers} setLayers={setLayers} />
+            <Suspense fallback={<LoadingObject />}>
+              <ModelLoader layers={layers} setLayers={setLayers} />
+            </Suspense>
           </CanvasContainer>
           {layers?.current ? (
             <Box>
@@ -52,7 +60,7 @@ const CreateModel = () => {
             </Box>
           ) : null}
         </Box>
-        <Aside layers={layers}/>
+        <Aside layers={layers} />
       </Box>
     </>
   );

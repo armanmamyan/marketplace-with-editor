@@ -1,15 +1,10 @@
-import { Suspense, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import { OrbitControls } from "@react-three/drei";
 import { Perf } from "r3f-perf";
 import Shoe from '../../assets/shoe-draco.glb'
-const LoadingObject = () => (
-  <mesh position-y={0.5} scale={[2, 3, 2]}>
-    <boxGeometry args={[1, 1, 1, 2, 2, 2]} />
-    <meshBasicMaterial wireframe color="red" />
-  </mesh>
-);
+
 
 const ModelLoader = ({layers, setLayers}) => {
   const modelRef = useRef(null);
@@ -44,8 +39,7 @@ const ModelLoader = ({layers, setLayers}) => {
     <>
       <Perf position="top-left" />
       <OrbitControls makeDefault />
-      <Suspense fallback={<LoadingObject />}>
-        <group
+      <group
           ref={modelRef}
           dispose={null}
           onPointerOver={handlePointerOver}
@@ -94,7 +88,6 @@ const ModelLoader = ({layers, setLayers}) => {
             material-color={layers.items.patch}
           />
         </group>
-      </Suspense>
     </>
   );
 };
